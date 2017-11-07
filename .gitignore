@@ -1,0 +1,8 @@
+languages/*
+upgrade/*
+index.php
+themes/*
+!themes/twentyseventeen-pendel-child/
+plugins/*
+!plugins/pendel
+.directory

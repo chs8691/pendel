@@ -1,0 +1,26 @@
+/*
+ Theme Name:   Twenty Seventeen Pendel Child
+ Theme URI:    http://example.com/twenty-fifteen-child/
+ Description:  Twenty Seventeen Pendel Child Theme
+ Author:       CHS
+ Author URI:   http://example.com
+ Template:     twentyseventeen
+ Version:      1.0.0
+ License:      GNU General Public License v2 or later
+ License URI:  http://www.gnu.org/licenses/gpl-2.0.html
+ Tags:         light, dark, two-columns, right-sidebar, responsive-layout, accessibility-ready
+ Text Domain:  twenty-seventeen-pendel-child
+*/
+body.page-template-template-full-width #content #primary {
+	max-width: 100%;
+}
+
+body.page-template-template-full-width #content #primary .entry-header,
+body.page-template-template-full-width #content #primary .entry-content {
+    float: none;
+    width: 100%;
+}
+
+body.page-template-template-full-width #content #primary .entry-header {
+    margin-bottom: 4em;
+}
