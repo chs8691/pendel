@@ -1,0 +1,150 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/*
+    Created on : 22.11.2017, 17:52:19
+    Author     : chris
+*/
+div.viewer{
+    font-family: sans-serif;
+    text-align: right;
+}
+#viewer-title{
+    font-size: larger;
+}
+#viewer-subtitle{
+    font-size: 50%;
+}
+@media only screen and (max-width: 768px) {
+    #viewer-title{
+        font-size: 70%;
+    }
+    #viewer-subtitle{
+        font-size: 40%;
+    }
+}
+
+#canvaspaper {
+    fill:rgb(252,252,252);
+    stroke-width:3;
+    stroke:rgb(200,200,200);
+}
+
+#svg-tile-rect {
+    fill:rgb(210,210,210);}
+
+#svg-tile-group {
+    animation: shake_out 0.5s ;
+}
+#svg-tile-group:hover {
+    fill: #00cc00 ;
+    animation: shake_in 0.5s ;
+}
+@keyframes shake_in {
+    25% {
+        transform: rotate(-5deg) ;
+    }
+    50% {
+        transform: rotate(+4deg) ;
+    }
+    75% {
+        transform: rotate(-3deg) ;
+    }
+    100% {
+        transform: rotate(+2deg) ;
+    }
+}
+@keyframes shake_out {
+    25% {
+        transform: rotate(-4deg) ;
+    }
+    50% {
+        transform: rotate(+3deg) ;
+    }
+    75% {
+        transform: rotate(-2deg) ;
+    }
+    100% {
+        transform: rotate(+1deg) ;
+    }
+}
+.modal {
+    display: block; /* none: Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    opacity: 1;
+    width: 100%; /* Full width */
+    height: 0%; /* 100%: Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+
+}
+.modal-in {
+    height: 100%;
+    animation: fadein 1s;
+}
+.modal-out {
+    height: 0%;
+    animation: fadeout 1s;
+}
+.close{
+    cursor: default;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    position: relative;
+    top: 0.1%;
+    left: auto;
+    margin: 1% auto; /* 15% from the top and centered */
+    padding-left: 1%;
+    padding-right: 1%;
+    padding-top: 0.5%;
+    text-align: right;
+    padding-bottom: 0.5%;
+    border: 1px solid #888;
+    width: 800px;  /*Could be more or less, depending on screen size */
+    max-width: 100%;
+    height: auto;
+}
+/* tablets and handhelds in landscape*/
+@media only screen and (orientation: landscape ) and (max-width: 768px) {
+    .modal-content {
+        background-color: #fefefe;
+        position: relative;
+        top: 0.1%;
+        left: auto;
+        margin: 1% auto; /* 15% from the top and centered */
+        padding-left: 1%;
+        padding-right: 1%;
+        padding-top: 0.5%;
+        text-align: right;
+        padding-bottom: 0.5%;
+        border: 1px solid #888;
+        width: 60%;
+    }
+}
+.viewer-subtitle a{
+    color: black !important;
+    text-decoration: none !important; /*Supressing underline doesn't work*/
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes fadeout {
+    from { opacity: 1;
+           height:100%;} /* Supress a roll up*/
+    to   { opacity: 0;
+           height:100%; }
+
+}
