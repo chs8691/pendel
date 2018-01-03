@@ -11,6 +11,9 @@ div.viewer{
     font-family: sans-serif;
     text-align: right;
 }
+#msg{
+    padding-left: 3em;
+}
 #viewer-title{
     font-size: larger;
 }
@@ -26,10 +29,16 @@ div.viewer{
     }
 }
 
+
 #canvaspaper {
     fill:rgb(252,252,252);
     stroke-width:3;
     stroke:rgb(200,200,200);
+}
+div.infoLine {
+    font-family: sans-serif;
+    font-size: x-small;
+    text-align: left;
 }
 
 #svg-tile-rect {

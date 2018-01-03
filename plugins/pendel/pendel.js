@@ -1,3 +1,38 @@
+window.onload = initDivMouseOver;
+var mouseIsOver = false;
+function initDivMouseOver() {
+    alert('initDivMouseOver ' + jQuery("#pendelActualNr").textContent);
+
+    var div = document.getElementById("svg-section");
+
+    mouseIsOver = false;
+    div.onmouseover = function () {
+        mouseIsOver = true;
+//        alert('onmouseover');
+    };
+    div.onmouseout = function () {
+        mouseIsOver = false;
+//        alert('onmouseout');
+    }
+    window.addEventListener('wheel', function (e) {
+        var direction = '';
+        if (event.wheelDelta > 0) {
+            direction = 'up';
+        } else {
+            direction = 'down';
+        }
+        switchCanvas(parseInt(document.getElementById("pendelActualNr").textContent),
+                parseInt(document.getElementById("pendelNr").textContent),
+                direction);
+
+    }, false);
+}
+
+
+
+function pendelOnWheel() {
+
+}
 /*
  * Show cliecked image in a viewer
  */
@@ -63,6 +98,51 @@ setInterval(function () {
     if (didScroll) {
         didScroll = false;
 //        console.log('You scrolled');
-//        alert('1');
+        alert(document.getElementById("pendelNr").textContent);
+        switchCanvas(document.getElementById("msg").textContent - 1);
     }
 }, 100);
+
+/**
+ * Call backend and get tiles for next canvas
+ * @param {Number} actualNr
+ * @param {Number} canvasNr max.
+ * @param {String} direction [up|down]
+ * @returns {undefined}
+ */
+function switchCanvas(actualNr, canvasNr, direction) {
+    var msg = document.getElementById("msg");
+    var newNr = 0;
+
+    // Check Precondition
+    if (direction == 'down') {
+        if (actualNr <= 1) {
+            msg.innerHTML = "geht nicht: actualNr=" + actualNr + " direction=" + direction;
+            return;
+        }
+        newNr = actualNr - 1;
+    } else if (direction == 'up') {
+        if (actualNr >= canvasNr) {
+            msg.innerHTML = "geht nicht: actualNr=" + actualNr + " direction=" + direction;
+            return;
+        }
+        newNr = actualNr + 1;
+    } else {
+        msg.innerHTML = "Unknonwn direction=" + direction;
+        return;
+    }
+
+    msg.innerHTML = "geht: actualNr=" + actualNr + " newNr=" + newNr + " direction=" + direction;
+
+    document.getElementById("pendelActualNr").textContent = newNr;
+
+    msg.innerHTML = "Sende actualNr=" + actualNr + " newNr=" + newNr + " um " + +new Date();
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            msg.innerHTML = this.responseText;
+        }
+    };
+    xmlhttp.open("GET", "get_tiles.php?nextNr=" + nr, true);
+    xmlhttp.send();
+}

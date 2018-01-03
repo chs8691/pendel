@@ -5,3 +5,4 @@ themes/*
 plugins/*
 !plugins/pendel
 .directory
+uploads/*

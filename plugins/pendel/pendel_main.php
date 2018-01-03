@@ -122,7 +122,9 @@ function hook_body($url) {
 //   |
 //   v                                   . Canvas (xmax,ymax)
 //  y, lat
-    $tiles = tiles_read(1);
+    // Show last canvas nr
+    $actualNr = $config->canvas_nr;
+    $tiles = tiles_read($actualNr);
     $canvasheight = $config->px_y + $config->tilespace;
     $canvaswidth = $config->px_x + $config->tilespace;
     $offseti = $config->imagesize / 2;
@@ -151,30 +153,40 @@ function hook_body($url) {
     </div>
     </div>
 
-    <svg  width="90%"  viewBox="0 0 <?php echo $canvaswidth ?> <?php echo $canvasheight; ?>" onscroll="pendelOnScrolled()">
-    <filter id="f1">
-        <feGaussianBlur stdDeviation="4" />
-    </filter>
-    <rect width="<?php echo $canvaswidth; ?>" height="<?php echo $canvasheight; ?>" id="canvaspaper"  />
-    <?php
-    foreach ($tiles as $tile) {
-        $midx = ($tile->pos_x * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
-        $midy = ($tile->pos_y * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
-        $src = $url . "/" . $tile->thumb_file;
-        $img = $url . "/" . $tile->image_file;
-        $title = preg_replace("/\r?\n/", "\\n", addslashes($tile->title));
-        $description = preg_replace("/\r?\n/", "\\n", addslashes($tile->description));
-        trigger_error("hook_body: sanitized file $tile->image_file : >>>$title<<<>>>$description<<<", E_USER_NOTICE);
 
-        echo "<g transform=\"translate($midx,$midy)\" onclick=\"onTileClicked('$img', '$title', '$description','$tile->lat','$tile->lon')\">";
-        echo "<g id=\"svg-tile-group\"> ";
-        echo "<rect id=\"svg-tile-rect\" y=\"-$offsett\" x=\"-$offsett\" width=\"$config->tilesize\" height=\"$config->tilesize\" filter=\"url(#f1)\" />";
-        echo "<image xlink:href=\"$src\" y=\"-$offseti\" x=\"-$offseti\" width=\"$config->imagesize\" height=\"$config->imagesize\"  />";
-        echo "</g>";
-        echo "</g>";
-    }
-    ?>
-    </svg>
+    <div id="svg-section">
+        <svg id="canvas" width="90%"  viewBox="0 0 <?php echo $canvaswidth ?> <?php echo $canvasheight; ?>">
+        <filter id="f1">
+            <feGaussianBlur stdDeviation="4" />
+        </filter>
+        <rect width="<?php echo $canvaswidth; ?>" height="<?php echo $canvasheight; ?>" id="canvaspaper"  />
+        <?php
+        foreach ($tiles as $tile) {
+            $midx = ($tile->pos_x * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
+            $midy = ($tile->pos_y * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
+            $src = $url . "/" . $tile->thumb_file;
+            $img = $url . "/" . $tile->image_file;
+            $title = preg_replace("/\r?\n/", "\\n", addslashes($tile->title));
+            $description = preg_replace("/\r?\n/", "\\n", addslashes($tile->description));
+            trigger_error("hook_body: sanitized file $tile->image_file : >>>$title<<<>>>$description<<<", E_USER_NOTICE);
+
+            echo "<g transform=\"translate($midx,$midy)\" onclick=\"onTileClicked('$img', '$title', '$description','$tile->lat','$tile->lon')\">";
+            echo "<g id=\"svg-tile-group\"> ";
+            echo "<rect id=\"svg-tile-rect\" y=\"-$offsett\" x=\"-$offsett\" width=\"$config->tilesize\" height=\"$config->tilesize\" filter=\"url(#f1)\" />";
+            echo "<image xlink:href=\"$src\" y=\"-$offseti\" x=\"-$offseti\" width=\"$config->imagesize\" height=\"$config->imagesize\"  />";
+            echo "</g>";
+            echo "</g>";
+        }
+        ?>
+        </svg>
+
+    </div>
+    <div class="infoLine">
+        <span id="pendelActualNr"><?php echo $actualNr; ?></span>/<span id="pendelNr"><?php echo $config->canvas_nr; ?></span>
+        <span id="msg">4</span>
+    </div>
+
+
     <br>
 
     <?php

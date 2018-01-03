@@ -91,7 +91,7 @@ function pendel_add_my_stylesheet() {
 }
 
 function pendel_add_my_script() {
-    wp_register_script('pendel-script', plugins_url('pendel.js', __FILE__));
+    wp_register_script('pendel-script', plugins_url('pendel.js', __FILE__), array('jquery'));
     wp_enqueue_script('pendel-script');
 
 //    wp_enqueue_script('leaflet-script', 'https://unpkg.com/leaflet@1.2.0/dist/leaflet.js', false);
@@ -103,3 +103,18 @@ function pendel_add_my_script() {
 add_action('wp_enqueue_scripts', 'pendel_add_my_stylesheet');
 add_action('wp_enqueue_scripts', 'pendel_add_my_script');
 
+
+// enqueue and localise scripts
+wp_localize_script('my-ajax-handle', 'the_ajax_script', array('ajaxurl' => admin_url('admin-ajax.php')));
+// THE AJAX ADD ACTIONS
+add_action('wp_ajax_the_ajax_hook', 'the_action_function');
+add_action('wp_ajax_nopriv_the_ajax_hook', 'the_action_function'); // need this to serve non logged in users
+// THE FUNCTION
+
+function the_action_function() {
+
+    $nextNr = $_REQUEST["nextNr"];
+    echo "Received nextNr=$nextNr";
+
+    die(); // wordpress may print out a spurious zero without this - can be particularly bad if using json
+}

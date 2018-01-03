@@ -126,8 +126,8 @@ class ConfigurationFacade {
      * Modify just the field canvas nr for the actual (latest) canvas nr.
      * The config item must exists
      */
-        function setCanvasNr($canvas_nr) {
-//        echo "2 modifyItem() <br>";
+    function setCanvasNr($canvas_nr) {
+//        echo " setCanvasNr() to $canvas_nr<br>";
         // There is just upt to one entry, it has always id 1.
         $item = $this->get();
         $this->deleteItem();
