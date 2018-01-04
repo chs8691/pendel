@@ -40,7 +40,7 @@ function on_content() {
 
     $id = extract_pendel_id(get_the_content());
     if ($id == false or strlen($id) == 0) {
-        trigger_error("Leaving pendel because of missing id.", E_USER_NOTICE);
+        log_error("Leaving pendel because of missing id.");
         return;
     }
     trigger_error("Set Pendel id=$id as global.");
@@ -94,6 +94,18 @@ function pendel_add_my_script() {
     wp_register_script('pendel-script', plugins_url('pendel.js', __FILE__), array('jquery'));
     wp_enqueue_script('pendel-script');
 
+    // Add JS object with constant values for the given JS file, so they can be accessed
+    // within the script, e.g. var url = pendel_vars.ajaxurl
+    // Original usage is for text localization.
+//  THE FUNCTION: 1 - js script handle name, 2 - JS object name for accessing array values
+    wp_localize_script('pendel-script', 'pendel_vars', array(
+        // URL to wp-admin/admin-ajax.php to process the request
+        'ajaxurl' => admin_url('admin-ajax.php'),
+            // generate a nonce with a unique ID "myajax-post-comment-nonce"
+            // so that you can check it later when an AJAX request is sent
+//        'security' => wp_create_nonce('my-special-string')
+    ));
+
 //    wp_enqueue_script('leaflet-script', 'https://unpkg.com/leaflet@1.2.0/dist/leaflet.js', false);
 }
 
@@ -103,18 +115,24 @@ function pendel_add_my_script() {
 add_action('wp_enqueue_scripts', 'pendel_add_my_stylesheet');
 add_action('wp_enqueue_scripts', 'pendel_add_my_script');
 
+//https://benmarshall.me/wordpress-ajax-frontend-backend/
+if (is_admin()) {
+// THE AJAX ADD ACTIONS. Must start with wp_ajax and wp_ajax_nopriv, followed by '_"
+// and then the action name, used in the POST data of the AJAX call in JS
+    add_action('wp_ajax_pendel_paging', 'on_pendel_paging');
+    add_action('wp_ajax_nopriv_pendel_paging', 'on_pendel_paging'); // need this to serve non logged in users
+} else {
+    // Add non-Ajax front-end action hooks here
+}
 
-// enqueue and localise scripts
-wp_localize_script('my-ajax-handle', 'the_ajax_script', array('ajaxurl' => admin_url('admin-ajax.php')));
-// THE AJAX ADD ACTIONS
-add_action('wp_ajax_the_ajax_hook', 'the_action_function');
-add_action('wp_ajax_nopriv_the_ajax_hook', 'the_action_function'); // need this to serve non logged in users
-// THE FUNCTION
-
-function the_action_function() {
-
+function on_pendel_paging() {
+//    check_ajax_referer('my-special-string', 'security');
+//    error_log("Pendel: on_pendel_paging()");
+    $actualNr = $_REQUEST["actualNr"];
     $nextNr = $_REQUEST["nextNr"];
-    echo "Received nextNr=$nextNr";
+
+    $arr = array('actualNr' => $actualNr, 'nextNr' => $nextNr);
+    echo json_encode($arr);
 
     die(); // wordpress may print out a spurious zero without this - can be particularly bad if using json
 }

@@ -4,7 +4,8 @@
 global $wpdb;
 
 /**
- * Log an notice
+ * Log an notice.
+ * TODO trigger_error Scheint nicht zu funktionieren
  * @param type $message
  */
 function log_notice($message) {
@@ -16,5 +17,5 @@ function log_notice($message) {
  * @param type $message
  */
 function log_error($message) {
-    trigger_error($message, E_USER_ERROR);
+    error_log($message, E_USER_ERROR);
 }

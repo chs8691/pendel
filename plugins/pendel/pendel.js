@@ -1,9 +1,12 @@
-window.onload = initDivMouseOver;
 var mouseIsOver = false;
-function initDivMouseOver() {
-    alert('initDivMouseOver ' + jQuery("#pendelActualNr").textContent);
 
-    var div = document.getElementById("svg-section");
+jQuery(document).ready(function () {
+    initDivMouseOver();
+});
+
+function initDivMouseOver() {
+//    alert('initDivMouseOver ' + jQuery("#pendelActualNr").text());
+    var div = jQuery("#svg-section");
 
     mouseIsOver = false;
     div.onmouseover = function () {
@@ -13,7 +16,7 @@ function initDivMouseOver() {
     div.onmouseout = function () {
         mouseIsOver = false;
 //        alert('onmouseout');
-    }
+    };
     window.addEventListener('wheel', function (e) {
         var direction = '';
         if (event.wheelDelta > 0) {
@@ -68,14 +71,14 @@ function onTileClicked(imageSrc, title, description, lat, lon) {
 // When the user clicks on <span> (x), close the modal
     span.onclick = function () {
         closeViewer();
-    }
+    };
 
 // When the user clicks anywhere outside of the modal, close it
     window.onclick = function (event) {
-        if (event.target == modal) {
+        if (event.target === modal) {
             closeViewer();
         }
-    }
+    };
     function closeViewer() {
         modal.className = 'modal modal-out'; // Whitespace!
         setTimeout(function () {
@@ -111,38 +114,49 @@ setInterval(function () {
  * @returns {undefined}
  */
 function switchCanvas(actualNr, canvasNr, direction) {
-    var msg = document.getElementById("msg");
+//    var msg = document.getElementById("msg");
+    var msg = jQuery("#msg");
     var newNr = 0;
 
     // Check Precondition
-    if (direction == 'down') {
+    if (direction === 'down') {
         if (actualNr <= 1) {
-            msg.innerHTML = "geht nicht: actualNr=" + actualNr + " direction=" + direction;
+            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
             return;
         }
         newNr = actualNr - 1;
-    } else if (direction == 'up') {
+    } else if (direction === 'up') {
         if (actualNr >= canvasNr) {
-            msg.innerHTML = "geht nicht: actualNr=" + actualNr + " direction=" + direction;
+            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
             return;
         }
         newNr = actualNr + 1;
     } else {
-        msg.innerHTML = "Unknonwn direction=" + direction;
+        msg.html("Unknonwn direction=" + direction);
         return;
     }
 
-    msg.innerHTML = "geht: actualNr=" + actualNr + " newNr=" + newNr + " direction=" + direction;
+    msg.html("geht: actualNr=" + actualNr + " newNr=" + newNr + " direction=" + direction);
 
-    document.getElementById("pendelActualNr").textContent = newNr;
+    jQuery("#pendelActualNr").text(newNr);
 
-    msg.innerHTML = "Sende actualNr=" + actualNr + " newNr=" + newNr + " um " + +new Date();
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            msg.innerHTML = this.responseText;
-        }
+    msg.html("Sende actualNr=" + actualNr + " newNr=" + newNr + " an " + pendel_vars.ajaxurl + " um " + +new Date());
+
+    var data = {
+        action: 'pendel_paging',
+        actualNr: actualNr,
+        nextNr: newNr
     };
-    xmlhttp.open("GET", "get_tiles.php?nextNr=" + nr, true);
-    xmlhttp.send();
+
+// URL, type, data
+    jQuery.post(pendel_vars.ajaxurl, data, function (response) {
+        var res = jQuery.parseJSON(response);
+//        alert('Got this from the server: actualNr=' + res.actualNr +
+//                ", nextNr=" + res.nextNr);
+        jQuery(msg.html('Got this from the server: actualNr=' + res.actualNr +
+                ", nextNr=" + res.nextNr));
+
+    });
+
+
 }
