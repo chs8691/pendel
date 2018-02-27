@@ -84,14 +84,14 @@ register_deactivation_hook(__FILE__, 'pendel_on_deactivation');
  */
 function pendel_add_my_stylesheet() {
     // Respects SSL, Style.css is relative to the current file
-    wp_register_style('pendel-style', plugins_url('style.css', __FILE__));
+    wp_register_style('pendel-style', plugins_url('pendel-style.css', __FILE__));
     wp_enqueue_style('pendel-style');
 
 //    wp_enqueue_style('leaflet-style', 'https://unpkg.com/leaflet@1.2.0/dist/leaflet.css');
 }
 
 function pendel_add_my_script() {
-    wp_register_script('pendel-script', plugins_url('pendel.js', __FILE__), array('jquery'));
+    wp_register_script('pendel-script', plugins_url('pendel-script.js', __FILE__), array('jquery'));
     wp_enqueue_script('pendel-script');
 
     // Add JS object with constant values for the given JS file, so they can be accessed
@@ -125,14 +125,21 @@ if (is_admin()) {
     // Add non-Ajax front-end action hooks here
 }
 
+/**
+ * This will be called bu AJAX request for scrolling
+ */
 function on_pendel_paging() {
+    error_log("on_pendel_paging()");
 //    check_ajax_referer('my-special-string', 'security');
-//    error_log("Pendel: on_pendel_paging()");
-    $actualNr = $_REQUEST["actualNr"];
-    $nextNr = $_REQUEST["nextNr"];
+    $next_nr = filter_input(INPUT_POST, "nextNr");
+    $pendel_id = filter_input(INPUT_POST, "pendelId");
+    error_log("Requested nextNr=$next_nr, pendelId=$pendel_id");
+    // Needed for database class.
+    $GLOBALS['pendel_id'] = $pendel_id;
 
-    $arr = array('actualNr' => $actualNr, 'nextNr' => $nextNr);
-    echo json_encode($arr);
+    $ret = get_tiles_status($next_nr);
+    error_log("Response json=$ret");
+    echo($ret);
 
     die(); // wordpress may print out a spurious zero without this - can be particularly bad if using json
 }

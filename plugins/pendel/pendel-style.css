@@ -7,51 +7,98 @@ and open the template in the editor.
     Created on : 22.11.2017, 17:52:19
     Author     : chris
 */
-div.viewer{
+
+div #pendel-viewer{
     font-family: sans-serif;
-    text-align: right;
+    text-align: rigth;
 }
-#msg{
+
+#pendel-msg{
     padding-left: 3em;
 }
-#viewer-title{
+
+#pendel-viewer-title{
     font-size: larger;
 }
-#viewer-subtitle{
+#pendel-viewer-subtitle{
     font-size: 50%;
 }
 @media only screen and (max-width: 768px) {
-    #viewer-title{
+    #pendel-viewer-title{
         font-size: 70%;
     }
-    #viewer-subtitle{
+    #pendel-viewer-subtitle{
         font-size: 40%;
     }
 }
-
-
-#canvaspaper {
-    fill:rgb(252,252,252);
-    stroke-width:3;
-    stroke:rgb(200,200,200);
+#pendel-content{
+    width: 100%;
+    padding-right: 2px;
 }
-div.infoLine {
+#pendel-content-box {
+    height: auto;
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    flex-wrap: nowrap;
+    flex: auto;
+    justify-content: space-between;
+
+}
+#pendel-v-slider {
+    background: whitesmoke;
+    padding-top: 0px;
+    height: auto;
+}
+
+#pendel-v-slider-knob {
+    background: gainsboro;
+}
+
+#pendel-canvaspaper {
+    fill:rgb(252,252,252);
+    /*stroke-width:3;*/
+    /*stroke:rgb(200,200,200);*/
+}
+
+#pendel-info-line {
     font-family: sans-serif;
     font-size: x-small;
     text-align: left;
 }
-
-#svg-tile-rect {
-    fill:rgb(210,210,210);}
-
-#svg-tile-group {
-    animation: shake_out 0.5s ;
+#pendel-svg-tile-rect {
+    fill:rgb(210,210,210);
 }
-#svg-tile-group:hover {
+
+#pendel-svg-tile-group {
+    animation: pendel-shake-out 0.5s ;
+}
+#pendel-svg-tile-group:hover {
     fill: #00cc00 ;
-    animation: shake_in 0.5s ;
+    animation: pendel-shake-in 0.5s ;
 }
-@keyframes shake_in {
+
+.pendel-svg-tile {
+    visibility: visible;
+    opacity: 1;
+    animation: pendel-fade-in 0.5s linear;
+}
+.pendel-svg-tile-hidden {
+    opacity: 0;
+    visibility: hidden;
+    animation: pendel-fade-out 0.5s linear;
+}
+
+@keyframes pendel-fade-in {
+    0% { opacity: 0 }
+    100% { opacity: 1 }
+}
+@keyframes pendel-fade-out {
+    0% { opacity: 1 }
+    100% { opacity: 0 }
+}
+
+@keyframes pendel-shake-in {
     25% {
         transform: rotate(-5deg) ;
     }
@@ -65,7 +112,7 @@ div.infoLine {
         transform: rotate(+2deg) ;
     }
 }
-@keyframes shake_out {
+@keyframes pendel-shake-out {
     25% {
         transform: rotate(-4deg) ;
     }
@@ -79,7 +126,7 @@ div.infoLine {
         transform: rotate(+1deg) ;
     }
 }
-.modal {
+.pendel-modal {
     display: block; /* none: Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -93,22 +140,22 @@ div.infoLine {
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 
 }
-.modal-in {
+.pendel-modal-in {
     height: 100%;
     animation: fadein 1s;
 }
-.modal-out {
+.pendel-modal-out {
     height: 0%;
     animation: fadeout 1s;
 }
-.close{
+#pendel-close{
     cursor: default;
     padding-left: 5px;
     padding-right: 5px;
 }
 
 /* Modal Content/Box */
-.modal-content {
+#pendel-modal-content {
     background-color: #fefefe;
     position: relative;
     top: 0.1%;
@@ -126,7 +173,7 @@ div.infoLine {
 }
 /* tablets and handhelds in landscape*/
 @media only screen and (orientation: landscape ) and (max-width: 768px) {
-    .modal-content {
+    .pendel-modal-content {
         background-color: #fefefe;
         position: relative;
         top: 0.1%;
@@ -141,7 +188,7 @@ div.infoLine {
         width: 60%;
     }
 }
-.viewer-subtitle a{
+#pendel-viewer-subtitle a{
     color: black !important;
     text-decoration: none !important; /*Supressing underline doesn't work*/
 }

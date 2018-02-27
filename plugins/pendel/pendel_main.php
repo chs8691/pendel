@@ -2,9 +2,9 @@
 /*
  * TODO Media settings 'Organize my uploads into month...' must be enabled.
  */
-require_once( 'configuration.php' );
+require_once( 'pendel-configuration.php' );
 
-require_once( 'tiles.php' );
+require_once( 'pendel-tiles.php' );
 
 /* Extracts the name (id) of the pendel [pendel: ...]
  * string $page - String with pendel page content.
@@ -132,61 +132,63 @@ function hook_body($url) {
     ?>
     <!-- Trigger/Open The Modal -->
     <!--<button id="myBtn">Open Modal</button>-->
-
     <!-- The Modal -->
-    <div id="pendelModal" class="modal">
+    <div id="pendel-modal" class="pendel-modal">
 
         <!-- Modal content -->
-        <div id="pendelModalContent" class="modal-content">
-            <span class="close">&times;</span>
-            <img   id="pendelModalImg">
+        <div id="pendel-modal-content" >
+            <span id="pendel-close">&times;</span>
+            <img   id="pendel-modal-image">
 
-            <div class="viewer">
-                <div  id="viewer-title"></div>
-                <div  id="viewer-subtitle" class="viewer-subtitle">
+            <div id="pendel-viewer">
+                <div  id="pendel-viewer-title"></div>
+                <div  id="pendel-viewer-subtitle" >
                 </div>
-
             </div>
+        </div>
+    </div>
+    <div id="pendel-content-box">
+        <div id="pendel-content">
+            <svg id="pendel-canvas" width="100%"  viewBox="0 0 <?php echo $canvaswidth ?> <?php echo $canvasheight; ?>">
+            <filter id="f1">
+                <feGaussianBlur stdDeviation="4" />
+            </filter>
+            <rect width="<?php echo $canvaswidth; ?>" height="<?php echo $canvasheight; ?>" id="pendel-canvaspaper"  />
+            <?php
+            foreach ($tiles as $tile) {
+                $midx = ($tile->pos_x * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
+                $midy = ($tile->pos_y * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
+                $src = $url . "/" . $tile->thumb_file;
+                $img = $url . "/" . $tile->image_file;
+                $title = preg_replace("/\r?\n/", "\\n", addslashes($tile->title));
+                $description = preg_replace("/\r?\n/", "\\n", addslashes($tile->description));
+                trigger_error("hook_body: sanitized file $tile->image_file : >>>$title<<<>>>$description<<<", E_USER_NOTICE);
 
+                // The ID will be used in JS to hide element
+                $id = toImageId($tile->id);
+                echo "<g id=\"$id\" class=\"pendel-svg-tile\" transform=\"translate($midx,$midy)\" onclick=\"pendelOnTileClicked('$img', '$title', '$description','$tile->lat','$tile->lon')\">";
+                echo "<g id=\"pendel-svg-tile-group\"> ";
+                echo "<rect id=\"pendel-svg-tile-rect\" y=\"-$offsett\" x=\"-$offsett\" width=\"$config->tilesize\" height=\"$config->tilesize\" filter=\"url(#f1)\" />";
+                echo "<image xlink:href=\"$src\" y=\"-$offseti\" x=\"-$offseti\" width=\"$config->imagesize\" height=\"$config->imagesize\"  />";
+                echo "</g>";
+                echo "</g>";
+            }
+            ?>
+            </svg>
+            <div id="pendel-info-line">
+                <span id="pendel-page-title"></span> /
+                <span id="pendel-actual-nr"><?php echo $actualNr; ?></span> /
+                <span id="pendel-nr"><?php echo $config->canvas_nr; ?></span>
+                <span id="pendel-id"><?php echo $config->id; ?></span>
+                <span id="pendel-msg"></span>
+            </div>
+        </div>
+        <div  id="pendel-v-slider">
+            <div id="pendel-v-slider-knob" >
+            </div>
 
         </div>
     </div>
-    </div>
-
-
-    <div id="svg-section">
-        <svg id="canvas" width="90%"  viewBox="0 0 <?php echo $canvaswidth ?> <?php echo $canvasheight; ?>">
-        <filter id="f1">
-            <feGaussianBlur stdDeviation="4" />
-        </filter>
-        <rect width="<?php echo $canvaswidth; ?>" height="<?php echo $canvasheight; ?>" id="canvaspaper"  />
-        <?php
-        foreach ($tiles as $tile) {
-            $midx = ($tile->pos_x * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
-            $midy = ($tile->pos_y * ($config->tilesize + $config->tilespace)) + $config->tilespace + $offsett;
-            $src = $url . "/" . $tile->thumb_file;
-            $img = $url . "/" . $tile->image_file;
-            $title = preg_replace("/\r?\n/", "\\n", addslashes($tile->title));
-            $description = preg_replace("/\r?\n/", "\\n", addslashes($tile->description));
-            trigger_error("hook_body: sanitized file $tile->image_file : >>>$title<<<>>>$description<<<", E_USER_NOTICE);
-
-            echo "<g transform=\"translate($midx,$midy)\" onclick=\"onTileClicked('$img', '$title', '$description','$tile->lat','$tile->lon')\">";
-            echo "<g id=\"svg-tile-group\"> ";
-            echo "<rect id=\"svg-tile-rect\" y=\"-$offsett\" x=\"-$offsett\" width=\"$config->tilesize\" height=\"$config->tilesize\" filter=\"url(#f1)\" />";
-            echo "<image xlink:href=\"$src\" y=\"-$offseti\" x=\"-$offseti\" width=\"$config->imagesize\" height=\"$config->imagesize\"  />";
-            echo "</g>";
-            echo "</g>";
-        }
-        ?>
-        </svg>
-
-    </div>
-    <div class="infoLine">
-        <span id="pendelActualNr"><?php echo $actualNr; ?></span>/<span id="pendelNr"><?php echo $config->canvas_nr; ?></span>
-        <span id="msg">4</span>
-    </div>
-
-
     <br>
 
     <?php
@@ -223,4 +225,41 @@ function get_config() {
     $config->imagesize = $config->tilesize - (2 * $config->tilespace);
 
     return $config;
+}
+
+/*
+ * Returns an json with items for all changed images. Id is the image name.
+ * Item fields are status [visible, hidden].
+ * Example:
+ * { pendeltileid1 = TRUE;
+ *   pendeltileid2 = FALSE
+ * }
+ */
+
+function get_tiles_status($nextNr) {
+
+    $db = new TileFacade($GLOBALS['pendel_id']);
+    $tiles = $db->getAll();
+    $changes = array();
+
+    // Set visible status for every image
+    foreach ($tiles as $tile) {
+        if ($tile->nr <= $nextNr) {
+            $visible = 'true';
+        } else {
+            $visible = 'false';
+        }
+        $changes[toImageId($tile->id)] = $visible;
+    }
+    $json = json_encode($changes);
+    return $json;
+}
+
+/**
+ * Create unique and jQuery readable id of an image
+ * @param type $image_name
+ * @return type
+ */
+function toImageId($id) {
+    return "pendeltileid$id";
 }

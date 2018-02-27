@@ -1,6 +1,6 @@
 <?php
 
-require_once( 'globals.php' );
+require_once( 'pendel-globals.php' );
 
 class TileFacade {
 
@@ -76,51 +76,52 @@ class TileFacade {
     public function getByNr($nr) {
         $pendel_id = $GLOBALS['pendel_id'];
 
-//        echo "getByNr() for $nr <br>";
-//        $data = array();
-//        $index = 0;
         $results = $GLOBALS['wpdb']->get_results("SELECT * FROM $this->table_name WHERE nr='$nr' AND pendel_id='$pendel_id'");
-//        foreach ($results as $row) {
-//            echo " file=$row->image_file <br>";
-//            $ret = array(
-//                "id" => $row->id,
-//                "px_x" => $row->px_x,
-//                "px_y" => $row->px_y,
-//                "image_file" => $row->image_file,
-//                "thumb_file" => $row->thumb_file,
-//                "gps_file" => $row->gps_file,
-//                "reg_date" => $row->reg_date);
-//            $data[$index++] = $ow;
-//        }
+
         if (count($results) > 0) {
             return $results;
         } else {
             echo "Nothing found in table $this->table_name for pendel_id=$pendel_id and canvas_id=$nr! <br>";
             return NULL;
         }
+    }
 
-//        $sql = "SELECT * FROM " . $this->table_name . " WHERE nr=" . $nr;
-//        $result = $this->conn->query($sql);
-//        $data = array();
-//
-//        // There should only be one entry
-//        if ($result->num_rows > 0) {
-//            $index = 0;
-//            while ($row = $result->fetch_assoc()) {
-//                $ret = array(
-//                    "id" => $row["id"],
-//                    "pos_x" => $row["pos_x"],
-//                    "pos_y" => $row["pos_y"],
-//                    "image_file" => $row["image_file"],
-//                    "thumb_file" => $row["thumb_file"],
-//                    "gps_file" => $row["gps_file"],
-//                    "reg_date" => $row["reg_date"]);
-//                $data[$index++] = $ret;
-//            }
-//            return $data;
-//        }
-//        echo 'Tiles for level ' . $nr . ' not found in table ' . $this->table_name . '! <br>';
-//        return NULL;
+    /*
+     * Returns array with all tiles.
+     * If nothing found, returns NULL.
+     */
+
+    public function getAll() {
+        $pendel_id = $GLOBALS['pendel_id'];
+//        error_log("getAll() pendel_id=$pendel_id");
+
+        $results = $GLOBALS['wpdb']->get_results("SELECT * FROM $this->table_name WHERE pendel_id='$pendel_id'");
+//        error_log("getAll: select nr=" . count($results));
+
+        if (count($results) > 0) {
+            return $results;
+        } else {
+            error_log("Nothing found in table $this->table_name for pendel_id=$pendel_id");
+            return NULL;
+        }
+    }
+
+    /*
+     * Returns array with all tiles ligther equals the particular number.
+     * If nothing found, returns NULL.
+     */
+
+    public function getLENr($nr) {
+        $pendel_id = $GLOBALS['pendel_id'];
+
+        $results = $GLOBALS['wpdb']->get_results("SELECT * FROM $this->table_name WHERE nr<='$nr' AND pendel_id='$pendel_id'");
+
+        if (count($results) > 0) {
+            return $results;
+        } else {
+            echo "Nothing found in table $this->table_name for pendel_id=$pendel_id and canvas_id=$nr! <br>";
+            return NULL;
+        }
     }
 
     /**
@@ -159,13 +160,14 @@ class TileFacade {
  * Format of a line:
  * <file name><tab><lat> <lon><tab><title><tab><description>
  * 20170313-180536-DSCF4779.jpg	50.1555543999528 8.95522409999722 title description
+ * For every image there will be an particular canvas nr. Multiple images
+ * can have the same position.
  */
 
 function tiles_refresh_db($directory, $config) {
 
     $allowdTypes = array(IMAGETYPE_JPEG, IMAGETYPE_PNG);
     $db = new TileFacade($GLOBALS['pendel_id']);
-//    $db->initTable();
 //    echo 'tile_refresh_db: scanning =' . $directory . '<br>';
     $filenames = scandir($directory);
 //    foreach( $filenames as $f){
@@ -179,61 +181,144 @@ function tiles_refresh_db($directory, $config) {
 //    echo 'List with size=' . count($list) . '<br>';
 //    echo 'List item 1 with size=' . count($list[1]) . '<br>';
 //    echo 'List item 1 filename=' . $list[1]['filename'] . '<br>';
-    $i = 1;
 
-    for ($i = 1; $i <= count($list); $i++) {
-//        echo "Processing i=$i <br>";
-        for ($j = 1; $j <= $i; $j++) {
-            $filename = $list[$j]['filename'];
-//            echo "1 Processing j=$j filename=" . $list[$j]['filename'] . "<br>";
-            $tilename = 'tile_' . $list[$j]['filename'];
+    $j = 1;
+    for ($j = 1; $j <= count($list); $j++) {
+//        echo "Processing j=$j. <br>";
 
-            $image = getFileFromFilename($files, $list[$j]['filename']);
+        $filename = $list[$j]['filename'];
+//        echo "Processing j=$j filename=" . $list[$j]['filename'] . "<br>";
+        $tilename = 'tile_' . $list[$j]['filename'];
 
-            $type = exif_imagetype($image->getPathname());
-            if (in_array($type, $allowdTypes)) {
+        $image = getFileFromFilename($files, $list[$j]['filename']);
+
+        $type = exif_imagetype($image->getPathname());
+        if (in_array($type, $allowdTypes)) {
 //                $exifs = read_gps_location($image->getPathname());
 //                echo $image->getFilename() . ": " . var_dump($exifs);
-            } else {
-                echo "No image: " . $image->getFilename() . '<br>';
-                continue;
-            }
+        } else {
+            echo "No image: " . $image->getFilename() . '<br>';
+            continue;
+        }
 
-            $tiles_x = round($config->px_x / $config->tile_x);
-            $tiles_y = round($config->px_y / $config->tile_y);
+        $tiles_x = round($config->px_x / $config->tile_x);
+        $tiles_y = round($config->px_y / $config->tile_y);
 
-            $lat = $list[$j]['lat'];
-            $lon = $list[$j]['lon'];
-            $title = $list[$j]['title'];
-            $description = $list[$j]['description'];
+        $lat = $list[$j]['lat'];
+        $lon = $list[$j]['lon'];
+        $title = $list[$j]['title'];
+        $description = $list[$j]['description'];
 //            trigger_error("tiles_refresh_db: Description of file " . $imagename . ": >>>" . $description . "<<<");
-            // Now let's calculate the canvas place by $exifs lat and lng
-            // tiles_* - 1: indexing starts with 0!
-            $pos_x = floor(($tiles_x - 1 ) / ($config->end_lon - $config->start_lon) * ($list[$j]['lon'] - $config->start_lon));
+        // Now let's calculate the canvas place by $exifs lat and lng
+        // tiles_* - 1: indexing starts with 0!
+        $pos_x = floor(($tiles_x - 1 ) / ($config->end_lon - $config->start_lon) * ($list[$j]['lon'] - $config->start_lon));
 //            $pos_y = round($tiles_y / ($config->end_lat'] - $config->start_lat'] ) * ( $config->start_lat'] - $list[$j][$image->getFilename()]['lat'] ));
-            $pos_y = floor(($tiles_y - 1) * ( $config->start_lat - $list[$j]['lat'] ) / ($config->start_lat - $config->end_lat ));
+        $pos_y = floor(($tiles_y - 1) * ( $config->start_lat - $list[$j]['lat'] ) / ($config->start_lat - $config->end_lat ));
 //            echo "$imagename tiles [x,y]: [$tiles_x,$tiles_y] , pos[x,y]: $pos_x, $pos_y] config->px_x,y: [$config->px_x,$config->px_y] <br>";
 //            //Set images outside canvas to a border place
-            if ($pos_x >= $tiles_x) {
-                $pos_x = $tiles_x - 1;
-            }
-            if ($pos_y >= $tiles_y) {
-                $pos_y = $tiles_y - 1;
-            }
-            if ($pos_x < 0) {
-                $pos_x = 0;
-            }
-            if ($pos_y < 0) {
-                $pos_y = 0;
-            }
-//            echo "Insert $i, $pos_x, $pos_y, $lat, $lon, $title, $image->getFilename(), $tilename, $description <br>";
-            $db->insertItem($i, $pos_x, $pos_y, $lat, $lon, $title, $image->getFilename(), $tilename, NULL, $description);
+        if ($pos_x >= $tiles_x) {
+            $pos_x = $tiles_x - 1;
         }
+        if ($pos_y >= $tiles_y) {
+            $pos_y = $tiles_y - 1;
+        }
+        if ($pos_x < 0) {
+            $pos_x = 0;
+        }
+        if ($pos_y < 0) {
+            $pos_y = 0;
+        }
+//            echo "Insert $j, $pos_x, $pos_y, $lat, $lon, $title, $image->getFilename(), $tilename, $description <br>";
+        $db->insertItem($j, $pos_x, $pos_y, $lat, $lon, $title, $image->getFilename(), $tilename, NULL, $description);
     }
-//    echo ("Set canvas nr=$i in configuration $config->id <br>");
+//    echo ("Set canvas nr=$j in configuration $config->id <br>");
     $configDb = new ConfigurationFacade($config->id);
-    $configDb->setCanvasNr($i - 1);
+    $configDb->setCanvasNr($j - 1);
 }
+
+/*
+ *  Rebuild all tile items in database. For every image, there must be two files.
+ * First the original image and second the thumbnail image with same file name
+ * plus prefix 'tile_'.
+ * Returns nothing
+ * Format of a line:
+ * <file name><tab><lat> <lon><tab><title><tab><description>
+ * 20170313-180536-DSCF4779.jpg	50.1555543999528 8.95522409999722 title description
+ */
+
+//function tiles_refresh_db2($directory, $config) {
+//
+//    $allowdTypes = array(IMAGETYPE_JPEG, IMAGETYPE_PNG);
+//    $db = new TileFacade($GLOBALS['pendel_id']);
+////    $db->initTable();
+////    echo 'tile_refresh_db: scanning =' . $directory . '<br>';
+//    $filenames = scandir($directory);
+////    foreach( $filenames as $f){
+////    echo 'tile_refresh_db: file =' . $f . '<br>';
+////    }
+//
+//    $files = new DirectoryIterator($directory);
+////    echo var_dump($filenames);
+//
+//    $list = read_list_from_file($directory);
+////    echo 'List with size=' . count($list) . '<br>';
+////    echo 'List item 1 with size=' . count($list[1]) . '<br>';
+////    echo 'List item 1 filename=' . $list[1]['filename'] . '<br>';
+//    $i = 1;
+//
+//    for ($i = 1; $i <= count($list); $i++) {
+////        echo "Processing i=$i <br>";
+//        for ($j = 1; $j <= $i; $j++) {
+//            $filename = $list[$j]['filename'];
+////            echo "1 Processing j=$j filename=" . $list[$j]['filename'] . "<br>";
+//            $tilename = 'tile_' . $list[$j]['filename'];
+//
+//            $image = getFileFromFilename($files, $list[$j]['filename']);
+//
+//            $type = exif_imagetype($image->getPathname());
+//            if (in_array($type, $allowdTypes)) {
+////                $exifs = read_gps_location($image->getPathname());
+////                echo $image->getFilename() . ": " . var_dump($exifs);
+//            } else {
+//                echo "No image: " . $image->getFilename() . '<br>';
+//                continue;
+//            }
+//
+//            $tiles_x = round($config->px_x / $config->tile_x);
+//            $tiles_y = round($config->px_y / $config->tile_y);
+//
+//            $lat = $list[$j]['lat'];
+//            $lon = $list[$j]['lon'];
+//            $title = $list[$j]['title'];
+//            $description = $list[$j]['description'];
+////            trigger_error("tiles_refresh_db: Description of file " . $imagename . ": >>>" . $description . "<<<");
+//            // Now let's calculate the canvas place by $exifs lat and lng
+//            // tiles_* - 1: indexing starts with 0!
+//            $pos_x = floor(($tiles_x - 1 ) / ($config->end_lon - $config->start_lon) * ($list[$j]['lon'] - $config->start_lon));
+////            $pos_y = round($tiles_y / ($config->end_lat'] - $config->start_lat'] ) * ( $config->start_lat'] - $list[$j][$image->getFilename()]['lat'] ));
+//            $pos_y = floor(($tiles_y - 1) * ( $config->start_lat - $list[$j]['lat'] ) / ($config->start_lat - $config->end_lat ));
+////            echo "$imagename tiles [x,y]: [$tiles_x,$tiles_y] , pos[x,y]: $pos_x, $pos_y] config->px_x,y: [$config->px_x,$config->px_y] <br>";
+////            //Set images outside canvas to a border place
+//            if ($pos_x >= $tiles_x) {
+//                $pos_x = $tiles_x - 1;
+//            }
+//            if ($pos_y >= $tiles_y) {
+//                $pos_y = $tiles_y - 1;
+//            }
+//            if ($pos_x < 0) {
+//                $pos_x = 0;
+//            }
+//            if ($pos_y < 0) {
+//                $pos_y = 0;
+//            }
+////            echo "Insert $i, $pos_x, $pos_y, $lat, $lon, $title, $image->getFilename(), $tilename, $description <br>";
+//            $db->insertItem($i, $pos_x, $pos_y, $lat, $lon, $title, $image->getFilename(), $tilename, NULL, $description);
+//        }
+//    }
+////    echo ("Set canvas nr=$i in configuration $config->id <br>");
+//    $configDb = new ConfigurationFacade($config->id);
+//    $configDb->setCanvasNr($i - 1);
+//}
 
 /*
  *  Rebuild all tile items in database. For every image, there must be two files.
@@ -350,7 +435,7 @@ function getImageForTile($files, $tile) {
 // Returns array with tiles for a specific nr
 function tiles_read($nr) {
     $db = new TileFacade($GLOBALS['pendel_id']);
-    $ret = $db->getByNr($nr);
+    $ret = $db->getLENr($nr);
 //    echo var_dump($ret) . '<br>';
     return $ret;
 }
