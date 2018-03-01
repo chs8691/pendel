@@ -130,6 +130,17 @@ function hook_body($url) {
     $offseti = $config->imagesize / 2;
     $offsett = $config->tilesize / 2;
     ?>
+
+    <!--    <div>
+            <img id="myimg" height="20" width="20" data-src="http://127.0.0.1:8080/wordpress/wp-content/uploads/pendel/ffm/tile_20170313-180536-DSCF4779.jpg"/>
+        </div>
+        <br>
+        <div>
+            <svg width="10%">
+            <image id="myimage" height="20" width="20" datahref="http://127.0.0.1:8080/wordpress/wp-content/uploads/pendel/ffm/tile_20170329-165427-DSCF4795.jpg"/>
+            </svg>
+        </div>-->
+
     <!-- Trigger/Open The Modal -->
     <!--<button id="myBtn">Open Modal</button>-->
     <!-- The Modal -->
@@ -147,6 +158,7 @@ function hook_body($url) {
             </div>
         </div>
     </div>
+
     <div id="pendel-content-box">
         <div id="pendel-content">
             <svg id="pendel-canvas" width="100%"  viewBox="0 0 <?php echo $canvaswidth ?> <?php echo $canvasheight; ?>">
@@ -167,9 +179,10 @@ function hook_body($url) {
                 // The ID will be used in JS to hide element
                 $id = toImageId($tile->id);
                 echo "<g id=\"$id\" class=\"pendel-svg-tile\" transform=\"translate($midx,$midy)\" onclick=\"pendelOnTileClicked('$img', '$title', '$description','$tile->lat','$tile->lon')\">";
-                echo "<g id=\"pendel-svg-tile-group\"> ";
-                echo "<rect id=\"pendel-svg-tile-rect\" y=\"-$offsett\" x=\"-$offsett\" width=\"$config->tilesize\" height=\"$config->tilesize\" filter=\"url(#f1)\" />";
-                echo "<image xlink:href=\"$src\" y=\"-$offseti\" x=\"-$offseti\" width=\"$config->imagesize\" height=\"$config->imagesize\"  />";
+                echo "<g class=\"pendel-svg-tile-group\"> ";
+                echo "<rect class=\"pendel-svg-tile-rect\" y=\"-$offsett\" x=\"-$offsett\" width=\"$config->tilesize\" height=\"$config->tilesize\" filter=\"url(#f1)\" />";
+                echo "<rect  class=\"pendel-tile-background\" y=\"-$offseti\" x=\"-$offseti\" width=\"$config->imagesize\" height=\"$config->imagesize\"/>";
+                echo "<image class=\"pendel-tile-image\" datahref=\"$src\" y=\"-$offseti\" x=\"-$offseti\" width=\"$config->imagesize\" height=\"$config->imagesize\"  />";
                 echo "</g>";
                 echo "</g>";
             }

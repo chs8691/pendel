@@ -17,6 +17,18 @@ div #pendel-viewer{
     padding-left: 3em;
 }
 
+.pendel-tile-background{
+    fill: rgb(250,250,250);
+}
+.pendel-tile-image {
+    opacity: 1;
+    transition: opacity 3s;
+}
+
+.pendel-tile-image[datahref] {
+    opacity: 0;
+}
+
 #pendel-viewer-title{
     font-size: larger;
 }
@@ -66,14 +78,14 @@ div #pendel-viewer{
     font-size: x-small;
     text-align: left;
 }
-#pendel-svg-tile-rect {
+.pendel-svg-tile-rect {
     fill:rgb(210,210,210);
 }
 
-#pendel-svg-tile-group {
+.pendel-svg-tile-group {
     animation: pendel-shake-out 0.5s ;
 }
-#pendel-svg-tile-group:hover {
+.pendel-svg-tile-group:hover {
     fill: #00cc00 ;
     animation: pendel-shake-in 0.5s ;
 }

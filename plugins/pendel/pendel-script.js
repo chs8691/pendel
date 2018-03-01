@@ -54,13 +54,60 @@ function pendelIsPendel() {
     return !(jQuery("#pendel-content").length == 0);
 }
 
+/**
+ * Lazy load of all thumb images.
+ * @returns {undefined}
+ */
+function loadThumbs() {
+//    console.log("loadThumbs");
+
+//    // This works fine
+//    var img = jQuery("#myimg");
+//    img.attr('src', img.attr('data-src'));
+//    img.on("load", function () {
+//        console.log("loaded! img src=" + img.attr('src'));
+//        img.removeAttr('data-src');
+//    });
+//
+//    // This doens't work, onload will not processed, image not shown
+//    var image = jQuery("#myimage");
+//    image.on("load", function () {
+//        console.log("loaded");
+//        image.removeAttr('datahref');
+//    });
+//    image.attr('href', image.attr('datahref'));
+
+
+//    jQuery("image[data-href]").each(function (index) {
+//        jQuery(this).attr('xlink:href', jQuery(this).attr('data-href'));
+//        console.log(index + ": " + jQuery(this).attr('xlink:href'));
+//        jQuery(this).on("load", function () {
+//            console.log("item=" + jQuery(this).attr('xlink:href'));
+//            jQuery(this).removeAttr('xlink:href');
+//        });
+//    });
+
+    [].forEach.call(document.querySelectorAll('image[datahref]'), function (img) {
+//        console.log("image=" + img.getAttribute("datahref"));
+
+        img.addEventListener("load", function () {
+//            console.log("item=" + img.getAttribute('href'));
+            img.removeAttribute('datahref');
+        });
+        img.setAttribute('href', img.getAttribute('datahref'));
+    });
+}
+
 jQuery(document).ready(function () {
     if (!pendelIsPendel())
         return;
 
+
+
 // Map hidden page title to subheader field
     jQuery("#pendel-page-title").html(jQuery(".entry-title").text());
 
+    loadThumbs();
 
     // trigger function on each page resize
     jQuery(window).on('resize', resize);
