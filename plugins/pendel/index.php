@@ -106,6 +106,9 @@ function pendel_add_my_script() {
 //        'security' => wp_create_nonce('my-special-string')
     ));
 
+    //Touchscreen lib
+//    wp_register_script('pendel-touchswipe', plugins_url('jquery.touchSwipe.min.js', __FILE__));
+//    wp_enqueue_script('pendel-touchswipe');
 //    wp_enqueue_script('leaflet-script', 'https://unpkg.com/leaflet@1.2.0/dist/leaflet.js', false);
 }
 
@@ -123,6 +126,24 @@ if (is_admin()) {
     add_action('wp_ajax_nopriv_pendel_paging', 'on_pendel_paging'); // need this to serve non logged in users
 } else {
     // Add non-Ajax front-end action hooks here
+}
+
+/**
+ * This will be called bu AJAX request for getting tiles configuration
+ */
+function on_get_tiles_configuration() {
+    error_log("on_get_tiles_configuration()");
+//    check_ajax_referer('my-special-string', 'security');
+    $pendel_id = filter_input(INPUT_POST, "pendelId");
+    error_log("pendelId=$pendel_id");
+    // Needed for database class.
+    $GLOBALS['pendel_id'] = $pendel_id;
+
+    $ret = get_tiles_status($next_nr);
+    error_log("Response json=$ret");
+    echo($ret);
+
+    die(); // wordpress may print out a spurious zero without this - can be particularly bad if using json
 }
 
 /**

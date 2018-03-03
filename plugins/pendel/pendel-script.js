@@ -61,32 +61,6 @@ function pendelIsPendel() {
 function loadThumbs() {
 //    console.log("loadThumbs");
 
-//    // This works fine
-//    var img = jQuery("#myimg");
-//    img.attr('src', img.attr('data-src'));
-//    img.on("load", function () {
-//        console.log("loaded! img src=" + img.attr('src'));
-//        img.removeAttr('data-src');
-//    });
-//
-//    // This doens't work, onload will not processed, image not shown
-//    var image = jQuery("#myimage");
-//    image.on("load", function () {
-//        console.log("loaded");
-//        image.removeAttr('datahref');
-//    });
-//    image.attr('href', image.attr('datahref'));
-
-
-//    jQuery("image[data-href]").each(function (index) {
-//        jQuery(this).attr('xlink:href', jQuery(this).attr('data-href'));
-//        console.log(index + ": " + jQuery(this).attr('xlink:href'));
-//        jQuery(this).on("load", function () {
-//            console.log("item=" + jQuery(this).attr('xlink:href'));
-//            jQuery(this).removeAttr('xlink:href');
-//        });
-//    });
-
     [].forEach.call(document.querySelectorAll('image[datahref]'), function (img) {
 //        console.log("image=" + img.getAttribute("datahref"));
 
@@ -119,8 +93,9 @@ jQuery(document).ready(function () {
 
 
     pendelInitDivMouseOver();
-//    return;
-//    consol.log("ready() init mouse.")
+    pendelInitSwipeVertical();
+
+    //    consol.log("ready() init mouse.")
     jQuery(document).mousemove(function (event) {
         if (pendelIsSliding) {
             var py = event.pageY;
@@ -264,9 +239,10 @@ function pendelUpdateSliderPos(offset) {
 //    console.log("newOffset=" + newOffset);
     jQuery("#pendel-v-slider").css("paddingTop", newOffset);
 }
+
 function pendelInitDivMouseOver() {
 //    alert('initDivMouseOver ' + jQuery("#pendelActualNr").text());
-//    var div = jQuery("#svg-section");
+//
     var div = jQuery("#pendel-canvas");
 
     pendelMouseIsOver = false;
@@ -279,13 +255,34 @@ function pendelInitDivMouseOver() {
 //        alert('onmouseout');
     };
 
+
+    // disabel scrolling of mobile browser
+    document.body.addEventListener('touchmove', function (event) {
+        event.preventDefault();
+    }, false);
+
     window.addEventListener('wheel', function (e) {
         var direction = '';
-//        console.log("wheelCount=" + pendelWheelCount);
-        if (event.wheelDelta > 0) {
-            pendelWheelCount++;
-        } else {
-            pendelWheelCount--;
+        console.log(e.type);
+        e.preventDefault();
+        if (e.type == 'mousewheel') {
+            if (e.originalEvent.wheelDelta > 0) {
+                pendelWheelCount++;
+            } else {
+                pendelWheelCount--;
+            }
+        } else if (e.type == 'DOMMouseScroll') {
+            if (e.detail > 0) {
+                pendelWheelCount++;
+            } else {
+                pendelWheelCount--;
+            }
+        } else if (e.type == 'wheel') {
+            if (e.deltaY < 0) {
+                pendelWheelCount++;
+            } else {
+                pendelWheelCount--;
+            }
         }
 
 //       Reduce wheel threshold by incrementing both integer value
@@ -300,6 +297,42 @@ function pendelInitDivMouseOver() {
             pendelRefreshSlider();
         }
     }, false);
+}
+
+// Y start pixel for swiping
+var touchStart;
+
+function pendelInitSwipeVertical() {
+
+    var len = 50;
+    window.addEventListener('touchstart', function (event) {
+        if (event.targetTouches.length == 1) {
+            var touch = event.targetTouches[0];
+            touchStart = touch.pageY;
+            console.log("touchStart=" + touchStart);
+        }
+    }, false);
+
+    window.addEventListener('touchmove', function (event) {
+        // If there's exactly one finger inside this element
+
+        if (event.targetTouches.length == 1) {
+            var touch = event.targetTouches[0];
+//            console.log(touch.pageY);
+            if ((touch.pageY - touchStart) >= len) {
+//                console.log("down");
+                touchStart = touch.pageY;
+                pendelSwitchPage('down');
+                pendelRefreshSlider();
+            } else if ((touchStart - touch.pageY) >= len) {
+//                console.log("up");
+                touchStart = touch.pageY;
+                pendelSwitchPage('up');
+                pendelRefreshSlider();
+            }
+        }
+    }, false);
+
 }
 
 
@@ -351,11 +384,75 @@ function pendelOnTileClicked(imageSrc, title, description, lat, lon) {
 }
 
 /**
- * Call backend and get tiles for next canvas
+ * Updates the visibility of every tile in depenency of the actual page nr.
+ * Precondition: PageNr == tileNr
  * @param {String} direction [up|down]
  * @returns {undefined}
  */
 function pendelSwitchPage(direction) {
+//    console.log("switchPage()");
+    var msg = jQuery("#pendel-msg");
+
+    jQuery("#pendel-id").hide();
+    // Only for debugging
+    msg.hide();
+
+    var actualNr = parseInt(jQuery("#pendel-actual-nr").text());
+    var canvasNr = parseInt(jQuery("#pendel-nr").text());
+    var pendelId = jQuery("#pendel-id").text();
+    //
+    var nextNr = 0;
+    // Check Precondition
+    if (direction === 'down') {
+        if (actualNr < 1) {
+            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
+            return;
+        }
+        nextNr = actualNr - 1;
+    } else if (direction === 'up') {
+        if (actualNr >= canvasNr) {
+            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
+            return;
+        }
+        nextNr = actualNr + 1;
+    } else {
+        msg.html("Unknonwn direction=" + direction);
+        return;
+    }
+
+    jQuery("#pendel-actual-nr").text(nextNr);
+
+    // For all actual visible elements
+    jQuery('.pendel-svg-tile').each(function (i, obj) {
+        var elm = jQuery(obj);
+        if (idFromImageId(elm.attr('id')) > nextNr) {
+            elm.attr("class", "pendel-svg-tile-hidden");
+        }
+    });
+
+    // for all actual hidden elements
+    jQuery('.pendel-svg-tile-hidden').each(function (i, obj) {
+        var elm = jQuery(obj);
+        if (idFromImageId(elm.attr('id')) <= nextNr) {
+            elm.attr("class", "pendel-svg-tile");
+        }
+    });
+
+}
+/**
+ * Backwards function for the corresponding php function toImageId
+ * @param String $idString
+ * @return Integer
+ */
+function idFromImageId(idString) {
+    return idString.match(/\d+/)[0];
+}
+/**
+ * Call backend and get tiles for next canvas
+ * @param {String} direction [up|down]
+ * @returns {undefined}
+ */
+function pendelSwitchPageOld(direction) {
 //    console.log("switchPage()");
     var msg = jQuery("#pendel-msg");
 

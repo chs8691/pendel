@@ -131,16 +131,6 @@ function hook_body($url) {
     $offsett = $config->tilesize / 2;
     ?>
 
-    <!--    <div>
-            <img id="myimg" height="20" width="20" data-src="http://127.0.0.1:8080/wordpress/wp-content/uploads/pendel/ffm/tile_20170313-180536-DSCF4779.jpg"/>
-        </div>
-        <br>
-        <div>
-            <svg width="10%">
-            <image id="myimage" height="20" width="20" datahref="http://127.0.0.1:8080/wordpress/wp-content/uploads/pendel/ffm/tile_20170329-165427-DSCF4795.jpg"/>
-            </svg>
-        </div>-->
-
     <!-- Trigger/Open The Modal -->
     <!--<button id="myBtn">Open Modal</button>-->
     <!-- The Modal -->
@@ -269,7 +259,8 @@ function get_tiles_status($nextNr) {
 }
 
 /**
- * Create unique and jQuery readable id of an image
+ * Create unique and jQuery readable id of an image.
+ * There is a corresponding JS function idFromImageId for reverse converting.
  * @param type $image_name
  * @return type
  */
