@@ -8,6 +8,12 @@ and open the template in the editor.
     Author     : chris
 */
 
+body {
+    /* Disables pull-to-refresh and overscroll glow effect.
+       Still keeps swipe navigations. */
+    overscroll-behavior-y: none;
+}
+
 div #pendel-viewer{
     font-family: sans-serif;
     text-align: rigth;

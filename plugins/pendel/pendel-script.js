@@ -256,10 +256,11 @@ function pendelInitDivMouseOver() {
     };
 
 
-    // disabel scrolling of mobile browser
-    document.body.addEventListener('touchmove', function (event) {
-        event.preventDefault();
-    }, false);
+//    // disabel scrolling of mobile browser
+//    window.addEventListener('touchmove', function (event) {
+//        event.preventDefault();
+//        return false;
+//    }, false);
 
     window.addEventListener('wheel', function (e) {
         var direction = '';
