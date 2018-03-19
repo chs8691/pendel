@@ -27,22 +27,16 @@ var resize = function () {
         height: jQuery(window).height()
     });
     pendelInitialize();
-
 };
-
-
 function pendelInitialize() {
 
 
     pendelContentHeight = window.innerHeight;
 //    console.log("contentHeight=" + pendelContentHeight);
     jQuery("#pendel-v-slider").height(pendelContentHeight);
-
     pendelWidthScaling();
     pendelAdjustKnobHeight();
     pendelRefreshSlider();
-
-
 }
 /**
  * Returns true, if content is a pendel content. Use this for every global
@@ -61,32 +55,61 @@ function pendelIsPendel() {
 function loadThumbs() {
 //    console.log("loadThumbs");
 
+    var max = 0;
+    var count = 0;
+    var progressBar = jQuery("#pendel-progress-bar");
+    var infoLine = jQuery("#pendel-info-line");
+    var msgLine = jQuery("#pendel-message-line");
+    var msg = jQuery("#pendel-msg");
+    msg.show();
+
+    infoLine.hide();
+
+    [].forEach.call(document.querySelectorAll('image[datahref]'), function (img) {
+        max = max + 1;
+    });
+    msg.html("Lade " + count + " von " + max + "...");
+
     [].forEach.call(document.querySelectorAll('image[datahref]'), function (img) {
 //        console.log("image=" + img.getAttribute("datahref"));
 
         img.addEventListener("load", function () {
 //            console.log("item=" + img.getAttribute('href'));
             img.removeAttribute('datahref');
+            count = count + 1;
+
+            // Progress bar, fade out after loading the last tile
+            if (count < max)
+            {
+                progressBar.width(msgLine.outerWidth() * count / max);
+                progressBar.attr("class", "pendel-progress-bar-active");
+                msg.html("Lade " + count + " von " + max + "...");
+
+            } else {
+                progressBar.width(msgLine.outerWidth());
+                progressBar.attr("class", "pendel-progress-bar-done");
+                msg.html("");
+                msgLine.hide();
+                infoLine.show();
+//                infoLine.height(infoLine.height() + 5);
+//                progressBar.height(1);
+            }
+
         });
         img.setAttribute('href', img.getAttribute('datahref'));
+
     });
 }
 
 jQuery(document).ready(function () {
     if (!pendelIsPendel())
         return;
-
-
-
 // Map hidden page title to subheader field
     jQuery("#pendel-page-title").html(jQuery(".entry-title").text());
-
     loadThumbs();
-
     // trigger function on each page resize
     jQuery(window).on('resize', resize);
     resize();
-
 //    console.log("jQuery.ready()");
 
     // Remove browser slider
@@ -94,7 +117,6 @@ jQuery(document).ready(function () {
 
     pendelInitDivMouseOver();
     pendelInitSwipeVertical();
-
     //    consol.log("ready() init mouse.")
     jQuery(document).mousemove(function (event) {
         if (pendelIsSliding) {
@@ -103,13 +125,11 @@ jQuery(document).ready(function () {
 //            console.log("slidingPos=" + slidingPos + ", move y=" + event.pageY + ", newPos=" + pos);
             pendelMoveKnob(pos);
             pendelSlidingPos = py;
-
             //
             if (event.stopPropagation)
                 event.stopPropagation();
             if (event.preventDefault)
                 event.preventDefault();
-
         }
     }).mouseup(function () {
         if (!pendelIsSliding) {
@@ -128,7 +148,6 @@ jQuery(document).ready(function () {
                 pendelSlidingPos = event.pageY;
 //                console.log("down at y=" + event.pageY);
             });
-
 });
 function pendelMoveKnob(delta) {
 //    console.log("moveKnob");
@@ -136,9 +155,7 @@ function pendelMoveKnob(delta) {
     var offset = padding + delta;
 //    console.log("moveKnob offset=" + offset);
     pendelUpdateSliderPos(offset);
-
     var actualPage = parseInt(jQuery("#pendel-actual-nr").text());
-
     newValue = pendelMaxPages - Math.round(offset / pendelPageStepSizePx);
 //    console.log("newValue=" + newValue);
     pendelChangeActualPos(actualPage, newValue);
@@ -214,12 +231,10 @@ function pendelGetSlideLength(scrollPx, pages) {
 }
 function pendelChangeActualPos(oldValue, newValue) {
     var newAct = newValue;
-
     if (newValue > pendelMaxPages)
         newAct = pendelMaxPages;
     else if (newValue < 0)
         newAct = 0;
-
     if (oldValue == newAct)
         return;
 //    console.log("newAct=" + newAct);
@@ -234,8 +249,6 @@ function pendelUpdateSliderPos(offset) {
         newOffset = 0;
     else
         newOffset = Math.min(offset, pendelSlidingLength);
-
-
 //    console.log("newOffset=" + newOffset);
     jQuery("#pendel-v-slider").css("paddingTop", newOffset);
 }
@@ -244,7 +257,6 @@ function pendelInitDivMouseOver() {
 //    alert('initDivMouseOver ' + jQuery("#pendelActualNr").text());
 //
     var div = jQuery("#pendel-canvas");
-
     pendelMouseIsOver = false;
     div.onmouseover = function () {
         pendelMouseIsOver = true;
@@ -254,8 +266,6 @@ function pendelInitDivMouseOver() {
         pendelMouseIsOver = false;
 //        alert('onmouseout');
     };
-
-
 //    // disabel scrolling of mobile browser
 //    window.addEventListener('touchmove', function (event) {
 //        event.preventDefault();
@@ -302,7 +312,6 @@ function pendelInitDivMouseOver() {
 
 // Y start pixel for swiping
 var touchStart;
-
 function pendelInitSwipeVertical() {
 
     var len = 50;
@@ -313,19 +322,18 @@ function pendelInitSwipeVertical() {
             console.log("touchStart=" + touchStart);
         }
     }, false);
-
     window.addEventListener('touchmove', function (event) {
         // If there's exactly one finger inside this element
 
         if (event.targetTouches.length == 1) {
             var touch = event.targetTouches[0];
 //            console.log(touch.pageY);
-            if ((touch.pageY - touchStart) >= len) {
+            if ((touchStart - touch.pageY) >= len) {
 //                console.log("down");
                 touchStart = touch.pageY;
                 pendelSwitchPage('down');
                 pendelRefreshSlider();
-            } else if ((touchStart - touch.pageY) >= len) {
+            } else if ((touch.pageY - touchStart) >= len) {
 //                console.log("up");
                 touchStart = touch.pageY;
                 pendelSwitchPage('up');
@@ -333,7 +341,6 @@ function pendelInitSwipeVertical() {
             }
         }
     }, false);
-
 }
 
 
@@ -347,18 +354,15 @@ function pendelOnTileClicked(imageSrc, title, description, lat, lon) {
     var modal = document.getElementById('pendel-modal');
     var content = document.getElementById('pendel-modal-content');
     var img = document.getElementById('pendel-modal-image');
-
     document.getElementById("pendel-viewer-title").textContent = title + ' / ' + description;
-
     document.getElementById("pendel-viewer-subtitle").innerHTML = lat + ", " + lon +
             " <a href=\"http://www.openstreetmap.org/?mlat=" + lat + "&mlon=" + lon + "\" target = \"_blank\" >osm</a>";
     // Set the image to show
     img.src = imageSrc;
-
-
     // Prevent for showing previous image next time
 //    setTimeout(function () {
     modal.className = 'pendel-modal pendel-modal-in'; // Whitespace!
+
 //    }, 1);
 
 //    content.className = 'pendel-modal-content pendel-modal-content-in';
@@ -368,7 +372,6 @@ function pendelOnTileClicked(imageSrc, title, description, lat, lon) {
     span.onclick = function () {
         closeViewer();
     };
-
 // When the user clicks anywhere outside of the modal, close it
     window.onclick = function (event) {
         if (event.target === modal) {
@@ -380,7 +383,6 @@ function pendelOnTileClicked(imageSrc, title, description, lat, lon) {
         setTimeout(function () {
             img.src = '';
         }, 1000);
-
     }
 }
 
@@ -393,11 +395,9 @@ function pendelOnTileClicked(imageSrc, title, description, lat, lon) {
 function pendelSwitchPage(direction) {
 //    console.log("switchPage()");
     var msg = jQuery("#pendel-msg");
-
     jQuery("#pendel-id").hide();
     // Only for debugging
-    msg.hide();
-
+//    msg.hide();
     var actualNr = parseInt(jQuery("#pendel-actual-nr").text());
     var canvasNr = parseInt(jQuery("#pendel-nr").text());
     var pendelId = jQuery("#pendel-id").text();
@@ -406,23 +406,22 @@ function pendelSwitchPage(direction) {
     // Check Precondition
     if (direction === 'down') {
         if (actualNr < 1) {
-            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
+//            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
             return;
         }
         nextNr = actualNr - 1;
     } else if (direction === 'up') {
         if (actualNr >= canvasNr) {
-            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
+//            msg.html("geht nicht: actualNr=" + actualNr + " direction=" + direction);
             return;
         }
         nextNr = actualNr + 1;
     } else {
-        msg.html("Unknonwn direction=" + direction);
+//        msg.html("Unknonwn direction=" + direction);
         return;
     }
 
     jQuery("#pendel-actual-nr").text(nextNr);
-
     // For all actual visible elements
     jQuery('.pendel-svg-tile').each(function (i, obj) {
         var elm = jQuery(obj);
@@ -430,7 +429,6 @@ function pendelSwitchPage(direction) {
             elm.attr("class", "pendel-svg-tile-hidden");
         }
     });
-
     // for all actual hidden elements
     jQuery('.pendel-svg-tile-hidden').each(function (i, obj) {
         var elm = jQuery(obj);
@@ -438,7 +436,6 @@ function pendelSwitchPage(direction) {
             elm.attr("class", "pendel-svg-tile");
         }
     });
-
 }
 /**
  * Backwards function for the corresponding php function toImageId
@@ -456,11 +453,9 @@ function idFromImageId(idString) {
 function pendelSwitchPageOld(direction) {
 //    console.log("switchPage()");
     var msg = jQuery("#pendel-msg");
-
     jQuery("#pendel-id").hide();
     // Only for debugging
     msg.hide();
-
     var actualNr = parseInt(jQuery("#pendel-actual-nr").text());
     var canvasNr = parseInt(jQuery("#pendel-nr").text());
     var pendelId = jQuery("#pendel-id").text();
@@ -493,7 +488,6 @@ function pendelSwitchPageOld(direction) {
         'pendelId': pendelId,
         'nextNr': nextNr
     };
-
 //    console.log("supress ajax call");
 //    return;
 

@@ -178,12 +178,17 @@ function hook_body($url) {
             }
             ?>
             </svg>
-            <div id="pendel-info-line">
-                <span id="pendel-page-title"></span> /
-                <span id="pendel-actual-nr"><?php echo $actualNr; ?></span> /
-                <span id="pendel-nr"><?php echo $config->canvas_nr; ?></span>
-                <span id="pendel-id"><?php echo $config->id; ?></span>
-                <span id="pendel-msg"></span>
+            <div id="pendel-footer">
+                <div id="pendel-progress-bar" class="pendel-progress-bar-done"></div>
+                <div id="pendel-info-line">
+                    <span id="pendel-page-title"></span> /
+                    <span id="pendel-actual-nr"><?php echo $actualNr; ?></span> /
+                    <span id="pendel-nr"><?php echo $config->canvas_nr; ?></span>
+                    <span id="pendel-id" hidden="true"><?php echo $config->id; ?></span>
+                </div>
+                <div id="pendel-message-line">
+                    <span id="pendel-msg"></span>
+                </div>
             </div>
         </div>
         <div  id="pendel-v-slider">
