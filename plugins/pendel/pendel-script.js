@@ -343,6 +343,48 @@ function pendelInitSwipeVertical() {
     }, false);
 }
 
+// Dimesions before inserting the image
+var modalViewerInitalHeight;
+var modalViewerInitialWidth;
+
+// View expects image with this ratio height / width
+var imageRatio = 2 / 3;
+
+/*
+ *  <img   id="pendel-modal-image" onload="resizeToMax(this.id)">
+ * @param {type} id
+ * @returns {undefined}
+ */
+function resizeToMax(id) {
+    return;
+    console.log("resizeToMax() ");
+    var myImage = new Image();
+    console.log("id=" + id);
+    var img = jQuery("#" + id);
+
+    // Has the original image size
+    myImage.src = img.attr("src");
+
+    var content = jQuery('#pendel-modal-content');
+
+    console.log("myImage.height=" + myImage.height + ", myImage.width=" + myImage.width);
+
+    var availableHeight = jQuery(window).height() - modalViewerInitalHeight;
+
+    var width = availableHeight / myImage.height * myImage.width;
+
+    var windowWidth = jQuery(window).width();
+    if (width > windowWidth)
+        width = windowWidth * 0.95;
+
+    console.log("availableHeight=" + availableHeight + ", Set width=" + width);
+    img.width(width);
+    content.width(width);
+
+    var sub = jQuery("#pendel-viewer")
+
+}
+
 
 /*
  * Show cliecked image in a viewer
@@ -352,20 +394,53 @@ function pendelOnTileClicked(imageSrc, title, description, lat, lon) {
 //    var modal = document.getElementById('pendelModal');
     var span = document.getElementById("pendel-close");
     var modal = document.getElementById('pendel-modal');
-    var content = document.getElementById('pendel-modal-content');
-    var img = document.getElementById('pendel-modal-image');
+    var content = jQuery('#pendel-modal-content');
+    var img = jQuery('#pendel-modal-image');
+    var frame = jQuery('#pendel-modal-frame');
     document.getElementById("pendel-viewer-title").textContent = title + ' / ' + description;
     document.getElementById("pendel-viewer-subtitle").innerHTML = lat + ", " + lon +
-            " <a href=\"http://www.openstreetmap.org/?mlat=" + lat + "&mlon=" + lon + "\" target = \"_blank\" >osm</a>";
+            " <a href=\"http://www.openstreetmap.org/?mlat=" + lat + "&mlon="
+            + lon + "\" target = \"_blank\" >osm</a>";
+
+    console.log("contentWidth=" + content.width() +
+            ", contentHeight=" + content.height());
+    modalViewerInitialWidth = content.width();
+
+    // Calculate top and buttom border, ignore previous image
+    modalViewerInitalHeight = content.height();
+
+    console.log("top=" + content.offset().top);
+
+    console.log("windowHeight=" + jQuery(window).height() +
+            ", windowWidth=" + jQuery(window).width());
+    console.log("modalViewerInitialWidht=" + modalViewerInitialWidth +
+            ", modalViewerInitalHeight=" + modalViewerInitalHeight);
     // Set the image to show
-    img.src = imageSrc;
-    // Prevent for showing previous image next time
-//    setTimeout(function () {
+
+    img.attr('src', imageSrc);
+
     modal.className = 'pendel-modal pendel-modal-in'; // Whitespace!
+    img.addClass('pendel-modal-image-in');
+    var sub = jQuery("#pendel-viewer");
 
-//    }, 1);
+    // Width by height
+    var frameHeight = 0.9 * (jQuery(window).height() - content.height() - content.offset().top);
+    var frameWidth = frameHeight / imageRatio;
 
-//    content.className = 'pendel-modal-content pendel-modal-content-in';
+    // To large for the window, size by width
+    if (frameWidth > jQuery(window).width()) {
+        console.log("Calculate frame size by window width")
+        frameWidth = 0.9 * jQuery(window).width();
+        frameHeight = frameWidth * imageRatio;
+    }
+
+    console.log("frameWidth=" + frameWidth +
+            ", frameHeight=" + frameHeight);
+    content.width(frameWidth);
+    img.width(frameWidth);
+
+    frame.width(frameWidth);
+    frame.height(frameHeight);
 
 
 // When the user clicks on <span> (x), close the modal
@@ -380,9 +455,10 @@ function pendelOnTileClicked(imageSrc, title, description, lat, lon) {
     };
     function closeViewer() {
         modal.className = 'pendel-modal pendel-modal-out'; // Whitespace!
-        setTimeout(function () {
-            img.src = '';
-        }, 1000);
+        img.removeClass('pendel-modal-image-in')
+        img.attr('src', '');
+        frame.height(0);
+
     }
 }
 

@@ -137,11 +137,15 @@ function hook_body($url) {
     <div id="pendel-modal" class="pendel-modal">
 
         <!-- Modal content -->
-        <div id="pendel-modal-content" >
-            <span id="pendel-close">&times;</span>
-            <img   id="pendel-modal-image">
+        <div id="pendel-modal-content" class="pendel-modal-content">
+            <div>
+                <span id="pendel-close">&times;</span>
+            </div>
+            <div id="pendel-modal-frame">
+                <img   id="pendel-modal-image" onload="resizeToMax(this.id)">
+            </div>
 
-            <div id="pendel-viewer">
+            <div id="pendel-viewer" class="pendel-viewer">
                 <div  id="pendel-viewer-title"></div>
                 <div  id="pendel-viewer-subtitle" >
                 </div>
