@@ -6,6 +6,28 @@ require_once( 'pendel-configuration.php' );
 
 require_once( 'pendel-tiles.php' );
 
+/*
+ * Extracts the refresh code value. Be shure, that content is a pendel string.
+ */
+
+function extract_refreshcode($page) {
+//    echo "6 extract_pendel_id() for $page <br>";
+//
+    //refreshcode must have a space before
+    preg_match('/.*\[pendel:.* refreshcode=\"(.*)\".*\].*/U', $page, $parts);
+
+//    echo("extract_pendel_id 0 = " . $parts[0] . '.<br>'); Shows all
+//    echo("extract_pendel_id 1 = " . $parts[1] . '.<br>'); Shows id
+
+    $code = $parts[1];
+    if ($code == NULL || strlen($code) == 0) {
+        trigger_error("Pendel configuration: missing refreshcode, e.g. 'refreshcode=abc'.", E_USER_WARNING);
+        return false;
+    }
+
+    return $code;
+}
+
 /* Extracts the name (id) of the pendel [pendel: ...]
  * string $page - String with pendel page content.
  * Returns String with id or false
@@ -81,7 +103,7 @@ function set_config($params) {
 function install() {
     (new ConfigurationFacade())->init_table();
     (new TileFacade())->initTable();
-    trigger_error("Pendel deinstalled", E_USER_NOTICE);
+    trigger_error("Pendel installed", E_USER_NOTICE);
 }
 
 /*

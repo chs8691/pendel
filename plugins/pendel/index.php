@@ -21,6 +21,23 @@
 require_once( 'pendel_main.php' );
 
 /*
+ * Declaration of URI parameter to bebuild the database. The refreshcode value
+ * has to be set in the pendel configuration string. E.g. if the pendel page is
+ * configures with
+ * [pendel: id="ffm" x="4000", ...., refreshcode="123"]
+ * Then the url to rebuild all tiles is
+ * http://127.0.0.1:8080/wordpress/sample-page/?refreshcode=123
+ * This is not very save, because the request parameter can be sniffed easily.
+ * But for this purposes I think it's ok.
+ *  */
+add_filter('query_vars', 'parameter_queryvars');
+
+function parameter_queryvars($qvars) {
+    $qvars[] = 'refreshcode';
+    return $qvars;
+}
+
+/*
  * Switch for pendel plugin. Has to be hooked in 'the_content'.
  * If pendel configuration is part of the page, all content will be replaced by
  * the canvas. For all other pages, page content will be returned.
@@ -37,7 +54,21 @@ function on_content() {
         return get_the_content();
     }
 
+    //----- Request for refreshing tiles
+    $codeact = filter_input(INPUT_GET, 'refreshcode', FILTER_SANITIZE_SPECIAL_CHARS);
+    if ($codeact != NULL && $codeact != FALSE) {
+        $codeexp = extract_refreshcode(get_the_content());
+        if ($codeact == $codeexp) {
+            echo "Refresh will be done now...<br>";
+            install();
+            echo "Done! You can close this page now.";
+        } else {
+            echo "Unsupported query";
+        }
+        return;
+    }
 
+    //----- Normal page call
     $id = extract_pendel_id(get_the_content());
     if ($id == false or strlen($id) == 0) {
         log_error("Leaving pendel because of missing id.");
