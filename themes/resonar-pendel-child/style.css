@@ -1,0 +1,77 @@
+/*
+ Theme Name:   Resonar Pendel Child
+ Theme URI:
+ Description:  Resonar Pendel Child Theme. Full widht withoud header, footer and scrollbar
+ Author:       CHS
+ Author URI:   https://christian-schulzendorff.blogspot.de/
+ Template:     resonar
+ Version:      1.0.0
+ License:      GNU General Public License v2 or later
+ License URI:  http://www.gnu.org/licenses/gpl-2.0.html
+ Tags:         light, dark, two-columns, right-sidebar, responsive-layout, accessibility-ready
+ Text Domain:  resonar-pendel-child
+*/
+
+/* Hide Wordpress header */
+body.page-template-template-full-width .site-header {
+    display: none;
+}
+
+/* make "parent" containers 100% width and height */
+body.page-template-template-full-width{
+    width: 100%;
+    height: 100%;
+    overflow:hidden;  /*to avoid scrollbars*/
+}
+body.page-template-template-full-width article{
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+
+/* Content */
+body.page-template-template-full-width #content #primary {
+    max-width: 100%;
+}
+
+body.page-template-template-full-width #content #primary .entry-header{
+    height: 0;
+}
+
+body.page-template-template-full-width #content #primary  .entry-header-inner {
+    height: 0;
+}
+
+body.page-template-template-full-width #content #primary  .entry-title {
+    padding: 0;
+    margin: 0;
+    display: none;
+
+}
+body.page-template-template-full-width #content #primary .entry-content-footer {
+    margin: 0;
+    padding: 0;
+}
+
+
+body.page-template-template-full-width #content #primary .entry-content {
+    margin: 0;
+    padding: 0;
+}
+
+body.page-template-template-full-width #content #primary .page {
+    padding: 0;
+    margin: 0;
+}
+
+/* Hide Wordpress footer */
+body.page-template-template-full-width footer {
+    display: none;
+}
+
+body.page-template-template-full-width #content #primary .entry-footer {
+    padding: 10;
+    margin: 10;
+}
+

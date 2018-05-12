@@ -1,8 +1,9 @@
 languages/*
 upgrade/*
 themes/*
-!themes/twentyseventeen-pendel-child/
+!themes/resonar-pendel-child
 plugins/*
 !plugins/pendel
+!plugins/pendel/nbproject/private
 .directory
 uploads/*
