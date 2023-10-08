@@ -6,7 +6,7 @@ In the first place, the plugin is the implementation of my Pendel blog and less 
 
 ![Canvas](/documentation/canvas.png)
 
-To see the plugin in action, visit the page 'Leinwand' at my Pendel Blog on http://earls5.uber.space/pendel
+To see the plugin in action, visit the page 'Leinwand' at my Blog on [http://earls5.uber.space/pendel](https://kollegen.uber.space/pendel/)
 
 ## Installation
 Precondition for using this plugin is an existing Wordpress installation and ftp access to the web content. The **theme** resonar must be used. If you want to use another theme, than you must write your own child theme.
