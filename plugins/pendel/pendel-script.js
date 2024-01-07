@@ -79,7 +79,7 @@ function loadThumbs() {
             count = count + 1;
 
             // Progress bar, fade out after loading the last tile
-            if (count < max)
+            if (count < (max - 1))
             {
                 progressBar.width(msgLine.outerWidth() * count / max);
                 progressBar.attr("class", "pendel-progress-bar-active");
